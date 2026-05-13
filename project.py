@@ -6,8 +6,6 @@ from gpiozero import Servo
 import gpiozero
 import explorerhat
 
-factory = PiGPIOFactory(host='raspberrypi.local')
-
 print("""
 Two sg90 servos, one for vertical tilt and one for horizontal.
 Tilt-servo has limitations 90 degrees with values 0 to 1. Possible wrongly assembled.
