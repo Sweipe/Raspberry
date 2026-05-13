@@ -11,7 +11,8 @@ def get_ssl_context(certfile, keyfile):
     return context
 
 #hostName = "0.0.0.0"
-hostName = "localhost"
+hostName = 192.168.1.211
+#hostName = "localhost"
 #serverPort = 443
 serverPort = 8000
 
