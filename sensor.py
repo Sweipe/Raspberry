@@ -12,4 +12,4 @@ trig_pin= 12
 sensor = DistanceSensor(echo=echo_pin, trigger=trig_pin, pin_factory=factory)
 
 while True:
-    print('Distance: 'sensor.distance*100)
+    print('Distance: ',sensor.distance*100)
