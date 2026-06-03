@@ -154,4 +154,5 @@ while True:
                 #'led':math.floor(rnd.random()*16),
                 'color':'red'
             }
+            mqttc.publish('data', json.dumps(data), retain=False)
             time.sleep(delay)
