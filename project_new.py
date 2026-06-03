@@ -83,7 +83,7 @@ def on_connect(client, userdata, flags, rc):
         print ("connected OK")
         return
 
-is_running = False
+is_running = True
 
 def on_message(client, obj, msg):
     print("msg from topic " + msg.topic + ": " + str(msg.payload))
