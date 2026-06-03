@@ -140,8 +140,8 @@ while True:
         time.sleep(delay)
         pixels.fill((0,0,0))
         for t in range(45):
-            # while not is_running:
-                # time.sleep(delay)
+            while not is_running:
+                time.sleep(delay)
             tServo.angle = 45+t
             Progress()
             print('Distance: %s meter, pan: %s, tilt: %s' % (sensor.distance,pServo.angle,tServo.angle))
