@@ -83,15 +83,19 @@ def on_connect(client, userdata, flags, rc):
         mqttc.connected_flag = True
         print ("connected OK")
         return
-    
+
+is_running = False
+
 def on_message(client, obj, msg):
     print("msg from topic " + msg.topic + ": " + str(msg.payload))
     if(msg.topic=='commands'):
         data = json.loads(msg.payload)
         print(data)
         if data['command'] == 'start':
+            is_running = True
             pass
         if data['command'] == 'stop':
+            is_running = False
             pass
         if data['command'] == 'changemode':
             pass
@@ -137,6 +141,8 @@ while True:
         time.sleep(delay)
         pixels.fill((0,0,0))
         for t in range(45):
+            while not is_running:
+                time.sleep(delay)
             tServo.angle = 45+t
             Progress()
             print('Distance: %s meter, pan: %s, tilt: %s' % (sensor.distance,pServo.angle,tServo.angle))
