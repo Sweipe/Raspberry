@@ -146,10 +146,10 @@ def on_message(client, obj, msg):
         print(data)
         if data['command'] == 'start':
             is_running = True
-            queue_msg.append('Running')
+            queue_msg.append({"topic":'status',"payload":'Running'})
         elif data['command'] == 'stop':
             is_running = False
-            queue_msg.append('Running')
+            queue_msg.append({"topic":'status',"payload":'Stopped'})
         elif data['command'] == 'changemode':
             pixelmode = data['mode']
     
@@ -188,11 +188,20 @@ while not mqttc.connected_flag:
 mqttc.publish('status', 'awake',retain=True,qos=1)
 mqttc.loop()
 
+def ClearTheQueue():
+    if mqttc._out_messages<10 and len(queue_msg)>0:
+        msg = queue_msg.pop(0)
+        _retain = False
+        if msg.topic == 'status' or msg.topic == 'action':
+            _retain=True
+        mqttc.publish(msg.topic,msg.payload,retain=_retain,qos=1)
+
 while True:
     for p in range(90):
         for t in range(45,90):
             RotateByAngle(p,t)
             while not is_running:
+                ClearTheQueue()
                 time.sleep(delay)
                 mqttc.loop()
             pServo.angle = p
@@ -200,6 +209,10 @@ while True:
             NextPattern()
             print('Distance: %s meter, pan: %s, tilt: %s' % (sensor.distance,pServo.angle,tServo.angle))
             data = ToBytes(BundleData())
+            ClearTheQueue()
+            while mqttc._out_messages>=9:
+                time.sleep(delay)
+                mqttc.loop()
             mqttc.publish('data', data, retain=False, qos=1)
             mqttc.loop()
             time.sleep(delay)
