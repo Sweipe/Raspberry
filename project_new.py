@@ -166,6 +166,9 @@ mqttc.on_connect = on_connect
 mqttc.on_publish = on_publish
 mqttc.on_subscribe = on_subscribe
 
+# Set will
+mqttc.will_set('status','fell',qos=2,retain=True)
+
 # enable TLS for secure connection
 mqttc.tls_set(tls_version= paho.mqtt.client.ssl.PROTOCOL_TLS)
 
