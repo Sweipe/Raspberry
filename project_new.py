@@ -21,8 +21,8 @@ import json
 import random as rnd
 import math
 import uuid
-import websockets
-import threading
+#import websockets
+#import threading
 import numpy as np
 import struct
 
