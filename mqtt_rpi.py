@@ -1,4 +1,4 @@
-#!/usr/bin/python
+# made by Alex Luu
 from paho.mqtt.enums import MQTTProtocolVersion
 import paho.mqtt.publish as publish
 import paho.mqtt.client as mqtt

@@ -1,3 +1,5 @@
+# made by Alex Luu
+
 # For raspberry
 from gpiozero.pins.pigpio import PiGPIOFactory
 
@@ -109,6 +111,24 @@ def NextPattern():
         if led_index > 15:
             led_index = 0
         pixels[led_index] = (10,0,0)
+    if pixelmode == 'blink':
+        if led_index = 0:
+            led_index = 1
+        else:
+            led_index = 0
+        for i in range(16):
+            if led_index == 1:
+                if i%2==0:
+                    pixels[i] = (0,50,0)
+                else:
+                    if i%2==0:
+                    pixels[i] = (0,0,0)
+            else:
+                if i%2==0:
+                    pixels[i] = (0,0,0)
+                else:
+                    if i%2==0:
+                    pixels[i] = (0,50,0)
     
 def BundleData():
     data_ = {
@@ -140,6 +160,7 @@ def on_connect(client, userdata, flags, rc, properties):
 queue_msg = []
 def on_message(client, obj, msg):
     global is_running
+    global pixelmode
     print("msg from topic " + msg.topic + ": " + str(msg.payload))
     if(msg.topic=='command'):
         data = json.loads(msg.payload)
@@ -151,7 +172,11 @@ def on_message(client, obj, msg):
             is_running = False
             queue_msg.append({"topic":'status',"payload":'Stopped'})
         elif data['command'] == 'changemode':
-            pixelmode = data['mode']
+            #pixelmode = data['mode']
+            if pixelmode == 'default':
+                pixelmode == 'blink'
+            elif pixelmode == 'blink':
+                pixelmode == 'default'
     
 def on_publish(client, obj, mid, rc, properties):
     print("on_publish callback: " + str(mid))
