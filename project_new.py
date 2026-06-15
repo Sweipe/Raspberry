@@ -114,7 +114,7 @@ def BundleData():
     data_ = {
     'pan':pServo.angle,
     'tilt':tServo.angle,
-    'distance':sensor.distance,
+    'distance':sensor.distance*100,
     'ledvalues':PixelsToLongArray()
     }
     return data_
