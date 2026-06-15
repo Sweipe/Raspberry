@@ -26,7 +26,7 @@ import uuid
 import numpy as np
 import struct
 
-import mqtt_rpi.py
+#import mqtt_rpi.py
 
 print("""
 Two sg90 servos, one for vertical tilt and one for horizontal.
@@ -83,7 +83,7 @@ led_index=0         #
 
 def PixelsToLongArray():
     long_array = []
-    for i in range(12):
+    for i in range(16):
         long_array += pixels[i]
     return long_array
 
@@ -183,6 +183,7 @@ while not mqttc.connected_flag:
     
 # Announce activation
 mqttc.publish('status', 'awake',qos=1)
+mqttc.loop()
 
 while True:
     for p in range(90):
