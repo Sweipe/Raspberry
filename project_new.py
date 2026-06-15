@@ -192,7 +192,7 @@ def ClearTheQueue():
     if len(mqttc._out_messages)<10 and len(queue_msg)>0:
         msg = queue_msg.pop(0)
         _retain = False
-        if msg.topic == 'status' or msg.topic == 'action':
+        if msg['topic'] == 'status' or msg['topic'] == 'action':
             _retain=True
         mqttc.publish(msg.topic,msg.payload,retain=_retain,qos=1)
 
