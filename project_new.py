@@ -112,7 +112,7 @@ def NextPattern():
             led_index = 0
         pixels[led_index] = (10,0,0)
     if pixelmode == 'blink':
-        if led_index = 0:
+        if led_index == 0:
             led_index = 1
         else:
             led_index = 0
