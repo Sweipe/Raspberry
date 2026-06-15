@@ -85,7 +85,6 @@ def PixelsToLongArray():
     long_array = []
     for i in range(16):
         long_array += pixels[i]
-    print(pixels)
     return long_array
 
 def RotateByValue(pan,tilt):
