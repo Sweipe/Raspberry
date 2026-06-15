@@ -112,7 +112,7 @@ def NextPattern():
         if led_index > 15:
             led_index = 0
         pixels[led_index] = (10,0,0)
-    if pixelmode == 'blink':
+    elif pixelmode == 'blink':
         if led_index == 0:
             led_index = 1
         else:
@@ -173,9 +173,9 @@ def on_message(client, obj, msg):
         elif data['command'] == 'changemode':
             #pixelmode = data['mode']
             if pixelmode == 'default':
-                pixelmode == 'blink'
+                pixelmode = 'blink'
             elif pixelmode == 'blink':
-                pixelmode == 'default'
+                pixelmode = 'default'
     
 def on_publish(client, obj, mid, rc, properties):
     print("on_publish callback: " + str(mid))
