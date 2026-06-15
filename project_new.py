@@ -204,3 +204,4 @@ while True:
             mqttc.loop()
             time.sleep(delay)
     is_running = False
+    mqttc.publish('action', data, retain=True, qos=1)
