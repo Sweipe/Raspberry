@@ -182,7 +182,7 @@ while not mqttc.connected_flag:
     mqttc.loop()
     
 # Announce activation
-mqttc.publish('status', 'awake',qos=1)
+mqttc.publish('status', 'awake',retain=True,qos=1)
 mqttc.loop()
 
 while True:
