@@ -105,6 +105,7 @@ def RotateByAngle(pan,tilt):
 
 def NextPattern():
     global led_index
+    global pixels
     if pixelmode == 'default':
         pixels[led_index] = (0,0,0)
         led_index += 1
@@ -121,13 +122,11 @@ def NextPattern():
                 if i%2==0:
                     pixels[i] = (0,50,0)
                 else:
-                    if i%2==0:
                     pixels[i] = (0,0,0)
             else:
                 if i%2==0:
                     pixels[i] = (0,0,0)
                 else:
-                    if i%2==0:
                     pixels[i] = (0,50,0)
     
 def BundleData():
