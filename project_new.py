@@ -189,7 +189,7 @@ mqttc.publish('status', 'awake',retain=True,qos=1)
 mqttc.loop()
 
 def ClearTheQueue():
-    if mqttc._out_messages<10 and len(queue_msg)>0:
+    if len(mqttc._out_messages)<10 and len(queue_msg)>0:
         msg = queue_msg.pop(0)
         _retain = False
         if msg.topic == 'status' or msg.topic == 'action':
@@ -210,7 +210,7 @@ while True:
             print('Distance: %s meter, pan: %s, tilt: %s' % (sensor.distance,pServo.angle,tServo.angle))
             data = ToBytes(BundleData())
             ClearTheQueue()
-            while mqttc._out_messages>=9:
+            while len(mqttc._out_messages)>=9:
                 time.sleep(delay)
                 mqttc.loop()
             mqttc.publish('data', data, retain=False, qos=1)
