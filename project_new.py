@@ -103,7 +103,7 @@ def RotateByAngle(pan,tilt):
 
 def NextPattern():
     global led_index
-    if pixelmode == 'default'
+    if pixelmode == 'default':
         pixels[led_index] = (0,0,0)
         led_index += 1
         if led_index > 15:
