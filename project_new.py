@@ -144,10 +144,10 @@ def on_message(client, obj, msg):
     if(msg.topic=='commands'):
         data = json.loads(msg.payload)
         print(data)
-        if data['command'] == 'start':
+        if data['command'] == 'startscan':
             is_running = True
             queue_msg.append({"topic":'status',"payload":'Running'})
-        elif data['command'] == 'stop':
+        elif data['command'] == 'stopscan':
             is_running = False
             queue_msg.append({"topic":'status',"payload":'Stopped'})
         elif data['command'] == 'changemode':
