@@ -141,7 +141,7 @@ queue_msg = []
 def on_message(client, obj, msg):
     global is_running
     print("msg from topic " + msg.topic + ": " + str(msg.payload))
-    if(msg.topic=='commands'):
+    if(msg.topic=='command'):
         data = json.loads(msg.payload)
         print(data)
         if data['command'] == 'startscan':
