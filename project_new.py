@@ -1,3 +1,4 @@
+# For raspberry
 from gpiozero.pins.pigpio import PiGPIOFactory
 
 import time
@@ -9,6 +10,9 @@ import explorerhat
 import board
 import neopixel
 
+# For MQTT
+from paho.mqtt.enums import MQTTProtocolVersion
+#import paho.mqtt.publish as publish
 import paho.mqtt.client as mqtt
 import paho
 import time
@@ -16,13 +20,13 @@ import os
 import json
 import random as rnd
 import math
+import uuid
+import websockets
+import threading
+import numpy as np
+import struct
 
-port = 8883
-server = 'fcc9c4202a6349fe835152164aa95227.s1.eu.hivemq.cloud'
-admin = 'origin'
-password = 'password1A'
-
-pixels = neopixel.NeoPixel(board.D18, 16) # 16 LEDs
+import mqtt_rpi.py
 
 print("""
 Two sg90 servos, one for vertical tilt and one for horizontal.
@@ -37,83 +41,130 @@ sudo -E env PATH=$PATH python project.py
 Press CTRL+C to exit.
 """)
 
+# Must have for using this pin factory, along with above commands
 factory = PiGPIOFactory(host='raspberrypi.local')
 
-max = 90
-#gpio_pin = 18
+# MQTT details
+port = 8883
+server = 'fcc9c4202a6349fe835152164aa95227.s1.eu.hivemq.cloud'
+admin = 'origin'
+password = 'password1A'
+
+# Neopixel
+pixels = neopixel.NeoPixel(board.D18, 16) # 16 LEDs
+pixelmode = 'default'
+
+# Servo
 pan_gpio_pin=17
 tilt_gpio_pin=10
 pServo = AngularServo(pan_gpio_pin,min_angle=0,max_angle=90,pin_factory=factory)
 tServo = AngularServo(tilt_gpio_pin,min_angle=0,max_angle=90,pin_factory=factory)
-pServo.value = 0.52
-tServo.value = 0.52
-#servo = Servo(18)
+pServo.value = 0.5
+tServo.value = 0.5
 
-# time delay for servo movement
-delay = 0.06
-
+# Distance sensor
 echo_pin=4
 trig_pin=5
 sensor=DistanceSensor(echo=echo_pin,trigger=trig_pin,max_distance=4,pin_factory=factory)
-led_index=0
+
+"""
+tilt starts up at 0 degree, and horizontala at 90 degeree
+
+limits -16.56 to 90 degrees with servo.angle
+
+90 is looking 12degrees down
+-16.56 is looking 45 degree up
+"""
+
+# Help variables
+delay = 0.06        # Delay waiting for new distance measurements
+is_running = True   # Boolean check, allows commands to start or stop
+led_index=0         # 
+
+def PixelsToLongArray():
+    long_array = []
+    for i in range(12):
+        long_array += pixels[i]
+    return long_array
 
 def RotateByValue(pan,tilt):
+    global pServo
+    global tServo
     pServo.value = pan
     tServo.value = tilt
-    time.sleep(0.05)
+    #time.sleep(0.05)
 
 def RotateByAngle(pan,tilt):
+    global pServo
+    global tServo
     pServo.angle = pan
     tServo.angle = tilt
-    time.sleep(0.05)
+    #time.sleep(0.05)
 
-def Progress():
+def NextPattern():
     global led_index
-    pixels[led_index] = (0,0,0)
-    led_index += 1
-    if led_index > 15:
-        led_index = 0
-    pixels[led_index] = (10,0,0)
+    if pixelmode = 'default'
+        pixels[led_index] = (0,0,0)
+        led_index += 1
+        if led_index > 15:
+            led_index = 0
+        pixels[led_index] = (10,0,0)
     
-# Define event callbacks
-def on_connect(client, userdata, flags, rc):
+def BundleData():
+    data_ = {
+    'pan':pServo.angle,
+    'tilt':tServo.angle,
+    'distance':sensor.distance,
+    'ledvalues':PixelsToLongArray()
+    }
+    return data_
+
+def ToBytes(data):
+    pack = struct.pack(
+    "<fff48B",  # float32 float32 float32 48*unsigned char
+        data['pan'],
+        data['tilt'],
+        data['distance'],
+        *data['ledvalues']  # array
+    )
+    return pack
+
+def on_connect(client, userdata, flags, rc, properties):
     print("on_connect callback: " + str(rc))
     if rc == 0:
-        mqttc.connected_flag = True
+        mqttc.subscribe('command',2)
         print ("connected OK")
+        mqttc.connected_flag = True
         return
 
-is_running = True
-
+queue_msg = []
 def on_message(client, obj, msg):
+    global is_running
     print("msg from topic " + msg.topic + ": " + str(msg.payload))
     if(msg.topic=='commands'):
         data = json.loads(msg.payload)
         print(data)
         if data['command'] == 'start':
             is_running = True
-            pass
-        if data['command'] == 'stop':
+            queue_msg.append('Running')
+        elif data['command'] == 'stop':
             is_running = False
-            pass
-        if data['command'] == 'changemode':
-            pass
-        # do something
-        pass
+            queue_msg.append('Running')
+        elif data['command'] == 'changemode':
+            pixelmode = data['mode']
     
-def on_publish(client, obj, mid):
+def on_publish(client, obj, mid, rc, properties):
     print("on_publish callback: " + str(mid))
     
-def on_subscribe(client, obj, mid, granted_qos):
+def on_subscribe(client, obj, mid, granted_qos, properties):
     print("Subscribed: " + str(mid) + " " + str(granted_qos))
     
-mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+mqttc = mqtt.Client(client_id="dev5",callback_api_version=mqtt.CallbackAPIVersion.VERSION2,protocol=mqtt.MQTTv5)
 # Assign event callbacks
 mqttc.on_message = on_message
 mqttc.on_connect = on_connect
 mqttc.on_publish = on_publish
 mqttc.on_subscribe = on_subscribe
-topic = 'mytopic'
 
 # enable TLS for secure connection
 mqttc.tls_set(tls_version= paho.mqtt.client.ssl.PROTOCOL_TLS)
@@ -122,37 +173,30 @@ mqttc.tls_set(tls_version= paho.mqtt.client.ssl.PROTOCOL_TLS)
 mqttc.username_pw_set(admin, password)
 
 # Connect
-mqttc.connect(server, port)
+mqttc.connect(server, port, clean_start=True)
 mqttc.connected_flag = False
 
 #wait in loop
 while not mqttc.connected_flag:
+    time.sleep (0.05)
     mqttc.loop()
-    time.sleep (1)
-
-mqttc.subscribe('commands', 2)
-mqttc.loop_start()
     
+# Announce activation
+mqttc.publish('status', 'awake',qos=1)
+
 while True:
-    for i in range(90):
-        pServo.angle = i
-        pixels.fill((10,0,0))
-        time.sleep(delay)
-        pixels.fill((0,0,0))
-        for t in range(45):
+    for p in range(90):
+        for t in range(45,90):
+            RotateByAngle(p,t)
             while not is_running:
                 time.sleep(delay)
-            tServo.angle = 45+t
-            Progress()
+                mqttc.loop()
+            pServo.angle = p
+            tServo.angle = t
+            NextPattern()
             print('Distance: %s meter, pan: %s, tilt: %s' % (sensor.distance,pServo.angle,tServo.angle))
-            data = {
-                'pan':pServo.angle,
-                'tilt':tServo.angle, 
-                'distance':sensor.distance,
-                'pixelcommand':'one',
-                'led':led_index,
-                #'led':math.floor(rnd.random()*16),
-                'color':'red'
-            }
-            mqttc.publish('data', json.dumps(data), retain=False)
+            data = ToBytes(BundleData())
+            mqttc.publish('data', data, retain=False, qos=1)
+            mqttc.loop()
             time.sleep(delay)
+    is_running = False
