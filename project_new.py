@@ -85,6 +85,7 @@ def PixelsToLongArray():
     long_array = []
     for i in range(16):
         long_array += pixels[i]
+    print(pixels)
     return long_array
 
 def RotateByValue(pan,tilt):
@@ -194,7 +195,7 @@ def ClearTheQueue():
         _retain = False
         if msg['topic'] == 'status' or msg['topic'] == 'action':
             _retain=True
-        mqttc.publish(msg.topic,msg.payload,retain=_retain,qos=1)
+        mqttc.publish(msg['topic'],msg['payload'],retain=_retain,qos=1)
 
 while True:
     for p in range(90):
